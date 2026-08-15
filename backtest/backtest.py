@@ -18,6 +18,9 @@ def run_backtest(
     entry_price = None
     trades = []
 
+    peak_balance = initial_balance
+    max_drawdown = 0.0
+
     for row in data:
         signal = row["signal"]
         close = row["close"]
@@ -40,6 +43,14 @@ def run_backtest(
 
             position = None
             entry_price = None
+
+        if balance > peak_balance:
+            peak_balance = balance
+
+        drawdown = peak_balance - balance
+
+        if drawdown > max_drawdown:
+            max_drawdown = drawdown
 
     total_profit = balance - initial_balance
 
@@ -68,6 +79,7 @@ def run_backtest(
         "winning_trades": len(winning_trades),
         "losing_trades": len(losing_trades),
         "win_rate": win_rate,
+        "max_drawdown": max_drawdown,
     }
 
 
@@ -88,6 +100,7 @@ def main():
     print(f"Winning trades: {result['winning_trades']}")
     print(f"Losing trades: {result['losing_trades']}")
     print(f"Win rate: {result['win_rate']:.2f}%")
+    print(f"Max drawdown: {result['max_drawdown']:.2f}")
 
 
 if __name__ == "__main__":
