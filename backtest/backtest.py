@@ -77,6 +77,31 @@ def run_backtest(
     else:
         win_rate = 0.0
 
+    gross_profit = sum(
+        trade["profit"]
+        for trade in winning_trades
+    )
+
+    gross_loss = sum(
+        abs(trade["profit"])
+        for trade in losing_trades
+    )
+
+    if winning_trades:
+        average_profit = gross_profit / len(winning_trades)
+    else:
+        average_profit = 0.0
+
+    if losing_trades:
+        average_loss = gross_loss / len(losing_trades)
+    else:
+        average_loss = 0.0
+
+    if gross_loss > 0:
+        profit_factor = gross_profit / gross_loss
+    else:
+        profit_factor = 0.0
+
     return {
         "initial_balance": initial_balance,
         "final_balance": balance,
@@ -86,6 +111,11 @@ def run_backtest(
         "losing_trades": len(losing_trades),
         "win_rate": win_rate,
         "max_drawdown": max_drawdown,
+        "gross_profit": gross_profit,
+        "gross_loss": gross_loss,
+        "average_profit": average_profit,
+        "average_loss": average_loss,
+        "profit_factor": profit_factor,
     }
 
 
@@ -107,6 +137,11 @@ def main():
     print(f"Losing trades: {result['losing_trades']}")
     print(f"Win rate: {result['win_rate']:.2f}%")
     print(f"Max drawdown: {result['max_drawdown']:.2f}")
+    print(f"Gross profit: {result['gross_profit']:.2f}")
+    print(f"Gross loss: {result['gross_loss']:.2f}")
+    print(f"Average profit: {result['average_profit']:.2f}")
+    print(f"Average loss: {result['average_loss']:.2f}")
+    print(f"Profit factor: {result['profit_factor']:.2f}")
 
     print()
     print("Trade history:")
@@ -122,3 +157,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
