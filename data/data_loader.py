@@ -32,10 +32,61 @@ def load_csv_data(filename: str = "sample_usdjpy.csv") -> list[dict]:
         return list(reader)
 
 
+def convert_price_data(data: list[dict]) -> list[dict]:
+    """価格データのOHLCVを数値に変換する。"""
+    numeric_columns = ["open", "high", "low", "close", "volume"]
+
+    converted = []
+
+    for row in data:
+        new_row = row.copy()
+
+        for column in numeric_columns:
+            new_row[column] = float(row[column])
+
+        new_row["volume"] = int(float(row["volume"]))
+
+        converted.append(new_row)
+
+    return converted
+
+
+def calculate_sma(data: list[dict], period: int = 3) -> list[dict]:
+    """終値から単純移動平均（SMA）を計算する。"""
+    if period <= 0:
+        raise ValueError("period must be greater than 0")
+
+    result = []
+
+    for index, row in enumerate(data):
+        new_row = row.copy()
+
+        if index + 1 >= period:
+            closes = [
+                item["close"]
+                for item in data[index + 1 - period:index + 1]
+            ]
+            new_row["sma"] = sum(closes) / period
+        else:
+            new_row["sma"] = None
+
+        result.append(new_row)
+
+    return result
+
+
 if __name__ == "__main__":
     path = save_sample_data()
     print(f"Sample data saved: {path}")
 
     data = load_csv_data()
     print(f"Rows loaded: {len(data)}")
-    print(f"Latest close: {data[-1]['close']}")
+
+    converted_data = convert_price_data(data)
+
+    print(f"Latest close: {converted_data[-1]['close']}")
+    print(f"Close type: {type(converted_data[-1]['close']).__name__}")
+
+    analyzed_data = calculate_sma(converted_data, period=3)
+
+    print(f"Latest SMA: {analyzed_data[-1]['sma']}")
