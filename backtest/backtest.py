@@ -102,6 +102,18 @@ def run_backtest(
     else:
         profit_factor = 0.0
 
+    current_loss_streak = 0
+    max_consecutive_losses = 0
+
+    for trade in trades:
+        if trade["profit"] < 0:
+            current_loss_streak += 1
+
+            if current_loss_streak > max_consecutive_losses:
+                max_consecutive_losses = current_loss_streak
+        else:
+            current_loss_streak = 0
+
     return {
         "initial_balance": initial_balance,
         "final_balance": balance,
@@ -116,6 +128,7 @@ def run_backtest(
         "average_profit": average_profit,
         "average_loss": average_loss,
         "profit_factor": profit_factor,
+        "max_consecutive_losses": max_consecutive_losses,
     }
 
 
@@ -142,6 +155,10 @@ def main():
     print(f"Average profit: {result['average_profit']:.2f}")
     print(f"Average loss: {result['average_loss']:.2f}")
     print(f"Profit factor: {result['profit_factor']:.2f}")
+    print(
+        f"Max consecutive losses: "
+        f"{result['max_consecutive_losses']}"
+    )
 
     print()
     print("Trade history:")
