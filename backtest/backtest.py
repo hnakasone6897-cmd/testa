@@ -16,6 +16,7 @@ def run_backtest(
     balance = initial_balance
     position = None
     entry_price = None
+    entry_time = None
     trades = []
 
     peak_balance = initial_balance
@@ -24,10 +25,12 @@ def run_backtest(
     for row in data:
         signal = row["signal"]
         close = row["close"]
+        current_time = row["time"]
 
         if signal == "BUY" and position is None:
             position = "LONG"
             entry_price = close
+            entry_time = current_time
 
         elif signal == "SELL" and position == "LONG":
             profit = close - entry_price
@@ -35,6 +38,8 @@ def run_backtest(
 
             trades.append(
                 {
+                    "entry_time": entry_time,
+                    "exit_time": current_time,
                     "entry": entry_price,
                     "exit": close,
                     "profit": profit,
@@ -43,6 +48,7 @@ def run_backtest(
 
             position = None
             entry_price = None
+            entry_time = None
 
         if balance > peak_balance:
             peak_balance = balance
@@ -101,6 +107,17 @@ def main():
     print(f"Losing trades: {result['losing_trades']}")
     print(f"Win rate: {result['win_rate']:.2f}%")
     print(f"Max drawdown: {result['max_drawdown']:.2f}")
+
+    print()
+    print("Trade history:")
+
+    for index, trade in enumerate(result["trades"], start=1):
+        print(f"Trade {index}:")
+        print(f"  Entry time: {trade['entry_time']}")
+        print(f"  Entry price: {trade['entry']:.2f}")
+        print(f"  Exit time: {trade['exit_time']}")
+        print(f"  Exit price: {trade['exit']:.2f}")
+        print(f"  Profit: {trade['profit']:.2f}")
 
 
 if __name__ == "__main__":
